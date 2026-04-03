@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Suporte — Mindmaster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --brand: #0eafb3;
+        --brand-hover: #0c9699;
+        --brand-soft: rgba(14, 175, 179, 0.12);
+        --brand-border: rgba(14, 175, 179, 0.35);
+        --text: #152028;
+        --muted: #5a6b72;
+        --line: #d5e0e2;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+        font-size: 15px;
+        line-height: 1.55;
+        color: var(--text);
+        background: linear-gradient(160deg, #eef8f8 0%, #f4f6f8 48%, #eef5f6 100%);
+        padding: 20px 16px;
+        min-height: 100%;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        max-width: 440px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 16px;
+        padding: 28px 26px 26px;
+        box-shadow:
+          0 4px 24px rgba(21, 32, 40, 0.06),
+          0 1px 3px rgba(21, 32, 40, 0.04);
+        border: 1px solid rgba(14, 175, 179, 0.08);
+      }
+      .head {
+        margin-bottom: 22px;
+      }
+      h1 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0 0 8px;
+        color: var(--text);
+      }
+      h1 span {
+        color: var(--brand);
+      }
+      .accent {
+        width: 48px;
+        height: 3px;
+        border-radius: 2px;
+        background: var(--brand);
+        margin-bottom: 10px;
+      }
+      .hint {
+        font-size: 0.875rem;
+        color: var(--muted);
+        margin: 0;
+        font-weight: 500;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.8125rem;
+        margin-bottom: 8px;
+        color: #2c3d42;
+        letter-spacing: 0.01em;
+      }
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px 14px;
+        font: inherit;
+        color: inherit;
+        background: #fafcfc;
+        transition:
+          border-color 0.15s ease,
+          background 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      input:hover,
+      textarea:hover {
+        border-color: #c5d4d6;
+        background: #fff;
+      }
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--brand);
+        background: #fff;
+        box-shadow: 0 0 0 3px var(--brand-soft);
+      }
+      textarea {
+        min-height: 128px;
+        resize: vertical;
+      }
+      .field {
+        margin-bottom: 18px;
+      }
+      button[type="submit"] {
+        width: 100%;
+        margin-top: 8px;
+        padding: 14px 18px;
+        font: inherit;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        letter-spacing: 0.02em;
+        color: #fff;
+        background: var(--brand);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 2px 12px rgba(14, 175, 179, 0.35);
+        transition:
+          background 0.18s ease,
+          box-shadow 0.18s ease,
+          transform 0.12s ease;
+      }
+      button[type="submit"]:hover:not(:disabled) {
+        background: var(--brand-hover);
+        box-shadow: 0 4px 16px rgba(14, 175, 179, 0.4);
+      }
+      button[type="submit"]:active:not(:disabled) {
+        transform: translateY(1px);
+      }
+      button[type="submit"]:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .msg {
+        display: none;
+        border-radius: 10px;
+        padding: 16px;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        margin-top: 18px;
+        line-height: 1.5;
+      }
+      .msg.is-visible {
+        display: block;
+      }
+      .msg.ok {
+        background: var(--brand-soft);
+        color: #0a5c5f;
+        border: 1px solid var(--brand-border);
+      }
+      .msg.err {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+      .hidden {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="head">
+        <div class="accent" aria-hidden="true"></div>
+        <h1>Fale com o <span>Suporte</span></h1>
+        <p class="hint">Gestão Ágil 2.0 — Mindmaster</p>
+      </div>
+
+      <form id="f" novalidate>
+        <div class="field hidden" aria-hidden="true">
+          <label for="company">Empresa</label>
+          <input type="text" id="company" name="company" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input id="nome" name="nome" type="text" required autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="email" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="duvida">Dúvida</label>
+          <textarea id="duvida" name="duvida" required></textarea>
+        </div>
+
+        <button type="submit" id="btn">Enviar</button>
+      </form>
+
+      <div id="ok" class="msg ok" role="status">
+        Seu chamado foi criado. Entraremos em contato em até 24 horas.
+      </div>
+      <div id="err" class="msg err" role="alert"></div>
+    </div>
+
+    <script>
+      (function () {
+        var TO = "suporte@mindmaster.com.br";
+        var form = document.getElementById("f");
+        var btn = document.getElementById("btn");
+        var ok = document.getElementById("ok");
+        var err = document.getElementById("err");
+
+        function showError(text) {
+          ok.classList.remove("is-visible");
+          err.textContent = text;
+          err.classList.add("is-visible");
+        }
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          err.textContent = "";
+          err.classList.remove("is-visible");
+          ok.classList.remove("is-visible");
+
+          if (form.company.value) {
+            return;
+          }
+
+          var nome = document.getElementById("nome").value.trim();
+          var email = document.getElementById("email").value.trim();
+          var duvida = document.getElementById("duvida").value.trim();
+
+          if (!nome || !email || !duvida) {
+            showError("Preencha nome, e-mail e dúvida.");
+            return;
+          }
+
+          btn.disabled = true;
+          var body = {
+            name: nome,
+            email: email,
+            message:
+              "Dúvida:\n\n" +
+              duvida +
+              "\n\n---\nEnviado pelo formulário Gestão Ágil 2.0 (iframe)",
+            _subject: "[Gestão Ágil 2.0] Novo chamado — " + nome,
+            _captcha: false,
+          };
+
+          fetch("https://formsubmit.co/ajax/" + encodeURIComponent(TO), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(body),
+          })
+            .then(function (r) {
+              return r.text().then(function (text) {
+                var data = {};
+                try {
+                  data = text ? JSON.parse(text) : {};
+                } catch (ignore) {}
+                if (!r.ok) {
+                  throw new Error(
+                    (data && data.message) || text || "Falha ao enviar."
+                  );
+                }
+                return data;
+              });
+            })
+            .then(function () {
+              form.reset();
+              ok.classList.add("is-visible");
+            })
+            .catch(function (er) {
+              showError(
+                er.message ||
+                  "Não foi possível enviar. Tente de novo em instantes."
+              );
+            })
+            .finally(function () {
+              btn.disabled = false;
+            });
+        });
+      })();
+    </script>
+  </body>
+</html>
