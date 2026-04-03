@@ -1,6 +1,8 @@
-const TO = "suporte@mindmaster.com.br";
-const FORMSUBMIT_URL =
-  "https://formsubmit.co/ajax/" + encodeURIComponent(TO);
+/**
+ * Envia os 3 campos do formulário por e-mail (Resend).
+ * Variáveis na Vercel: RESEND_API_KEY (obrigatória), RESEND_FROM, MAIL_TO
+ * @see https://resend.com/docs/send-with-nodejs
+ */
 
 function sendJson(res, statusCode, data) {
   res.statusCode = statusCode;
@@ -43,6 +45,17 @@ module.exports = async function handler(req, res) {
     return sendJson(res, 405, { message: "Method not allowed" });
   }
 
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM;
+  const mailTo = process.env.MAIL_TO || "contato@mindmaster.com.br";
+
+  if (!apiKey || !from) {
+    return sendJson(res, 503, {
+      message:
+        "E-mail não configurado: defina RESEND_API_KEY e RESEND_FROM nas Environment Variables da Vercel.",
+    });
+  }
+
   let input;
   try {
     input = await readJson(req);
@@ -60,47 +73,53 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const payload = {
-    name: nome,
-    email: email,
-    message:
-      "Dúvida:\n\n" +
-      duvida +
-      "\n\n---\nEnviado pelo formulário Gestão Ágil 2.0 (iframe)",
-    _subject: "[Gestão Ágil 2.0] Novo chamado — " + nome,
-    _captcha: false,
-  };
+  const textBody =
+    "Nome: " +
+    nome +
+    "\nE-mail: " +
+    email +
+    "\n\nDúvida:\n" +
+    duvida +
+    "\n\n---\nGestão Ágil 2.0 — formulário Suporte";
 
   try {
-    const r = await fetch(FORMSUBMIT_URL, {
+    const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
+        Authorization: "Bearer " + apiKey,
         "Content-Type": "application/json",
-        Accept: "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        from: from,
+        to: [mailTo],
+        reply_to: email,
+        subject: "[Gestão Ágil 2.0] Contato — " + nome,
+        text: textBody,
+      }),
     });
-    const text = await r.text();
+
+    const raw = await r.text();
     let data = {};
     try {
-      data = text ? JSON.parse(text) : {};
+      data = raw ? JSON.parse(raw) : {};
     } catch {
       /* ignore */
     }
+
     if (!r.ok) {
-      return sendJson(res, r.status || 502, {
+      return sendJson(res, 502, {
         message:
           (data && data.message) ||
-          text ||
-          "Falha ao enviar ao serviço de e-mail.",
+          raw ||
+          "Resend recusou o envio (verifique domínio/remetente).",
       });
     }
+
     return sendJson(res, 200, { ok: true });
   } catch (err) {
-    console.error("formsubmit proxy", err);
+    console.error("resend", err);
     return sendJson(res, 502, {
-      message:
-        "Não foi possível contatar o serviço de envio. Tente novamente.",
+      message: "Falha ao enviar e-mail. Tente novamente.",
     });
   }
 };

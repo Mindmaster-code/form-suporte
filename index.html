@@ -264,7 +264,7 @@
                 if (!r.ok) {
                   if (r.status === 401 || r.status === 403) {
                     throw new Error(
-                      "Acesso negado à API do site (configuração Vercel). Em Team Settings → Deployment Protection, permita funções em produção ou use um domínio sem proteção nesta rota."
+                      "A Vercel bloqueou a rota /api (proteção de deploy). Peça ao admin do time para liberar produção ou desativar proteção em rotas de função."
                     );
                   }
                   var msg =
