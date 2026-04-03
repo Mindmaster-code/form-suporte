@@ -1,6 +1,6 @@
 # form-suporte
 
-Formulário de contato (nome, e-mail, dúvida) → e-mail para **contato@mindmaster.com.br** via [Resend](https://resend.com).
+Formulário de contato (nome, e-mail, dúvida) → e-mail para **suporte@mindmaster.com.br** via [Resend](https://resend.com).
 
 ## Por que existe `/api/submit`
 
@@ -12,7 +12,7 @@ O navegador **não pode** enviar e-mail sozinho sem expor senhas/chaves. Uma rot
 | ------------------ | ----------- | -------------------------------------------- |
 | `RESEND_API_KEY`   | Sim         | chave em Resend → API Keys                   |
 | `RESEND_FROM`      | Sim         | `Mindmaster <noreply@mindmaster.com.br>`     |
-| `MAIL_TO`          | Não         | padrão: `contato@mindmaster.com.br`          |
+| `MAIL_TO`          | Não         | padrão: `suporte@mindmaster.com.br`          |
 
 O domínio do remetente precisa estar **verificado na Resend** (DNS).
 

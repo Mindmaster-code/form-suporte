@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
 
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM;
-  const mailTo = process.env.MAIL_TO || "contato@mindmaster.com.br";
+  const mailTo = process.env.MAIL_TO || "suporte@mindmaster.com.br";
 
   if (!apiKey || !from) {
     return sendJson(res, 503, {
