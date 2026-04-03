@@ -168,13 +168,6 @@
         color: #991b1b;
         border: 1px solid #fecaca;
       }
-      .hidden {
-        position: absolute;
-        left: -9999px;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-      }
     </style>
   </head>
   <body>
@@ -186,11 +179,6 @@
       </div>
 
       <form id="f" novalidate>
-        <div class="field hidden" aria-hidden="true">
-          <label for="company">Empresa</label>
-          <input type="text" id="company" name="company" tabindex="-1" autocomplete="off" />
-        </div>
-
         <div class="field">
           <label for="nome">Nome</label>
           <input id="nome" name="nome" type="text" required autocomplete="name" />
@@ -204,7 +192,7 @@
           <textarea id="duvida" name="duvida" required></textarea>
         </div>
 
-        <button type="submit" id="btn">Enviar</button>
+        <button type="submit" id="btn" data-label="Enviar">Enviar</button>
       </form>
 
       <div id="ok" class="msg ok" role="status">
@@ -226,15 +214,13 @@
           err.classList.add("is-visible");
         }
 
+        var btnDefault = btn.getAttribute("data-label") || "Enviar";
+
         form.addEventListener("submit", function (e) {
           e.preventDefault();
           err.textContent = "";
           err.classList.remove("is-visible");
           ok.classList.remove("is-visible");
-
-          if (form.company.value) {
-            return;
-          }
 
           var nome = document.getElementById("nome").value.trim();
           var email = document.getElementById("email").value.trim();
@@ -245,10 +231,18 @@
             return;
           }
 
+          var apiUrl =
+            (typeof location !== "undefined" && location.origin
+              ? location.origin
+              : "") + "/api/submit";
+
           btn.disabled = true;
+          btn.setAttribute("aria-busy", "true");
+          btn.textContent = "Enviando…";
+
           var body = { nome: nome, email: email, duvida: duvida };
 
-          fetch("/api/submit", {
+          fetch(apiUrl, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -263,9 +257,26 @@
                   data = text ? JSON.parse(text) : {};
                 } catch (ignore) {}
                 if (!r.ok) {
-                  throw new Error(
-                    (data && data.message) || text || "Falha ao enviar."
-                  );
+                  if (r.status === 401 || r.status === 403) {
+                    throw new Error(
+                      "Este ambiente está protegido na Vercel (login). Use o domínio de produção público ou desative a proteção de deploy em Project → Settings → Deployment Protection."
+                    );
+                  }
+                  var msg =
+                    (data && data.message) ||
+                    (text && text.length < 280 ? text : "") ||
+                    "Falha ao enviar (código " + r.status + ").";
+                  if (
+                    text &&
+                    (text.indexOf("<!doctype") === 0 ||
+                      text.indexOf("<html") !== -1)
+                  ) {
+                    msg =
+                      "Resposta inválida do servidor (código " +
+                      r.status +
+                      "). Confira se a URL é a de produção e se /api/submit existe no deploy.";
+                  }
+                  throw new Error(msg);
                 }
                 return data;
               });
@@ -276,12 +287,14 @@
             })
             .catch(function (er) {
               showError(
-                er.message ||
+                (er && er.message) ||
                   "Não foi possível enviar. Tente de novo em instantes."
               );
             })
             .finally(function () {
               btn.disabled = false;
+              btn.removeAttribute("aria-busy");
+              btn.textContent = btnDefault;
             });
         });
       })();
