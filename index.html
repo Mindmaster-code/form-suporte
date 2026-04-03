@@ -215,7 +215,6 @@
 
     <script>
       (function () {
-        var TO = "suporte@mindmaster.com.br";
         var form = document.getElementById("f");
         var btn = document.getElementById("btn");
         var ok = document.getElementById("ok");
@@ -247,18 +246,9 @@
           }
 
           btn.disabled = true;
-          var body = {
-            name: nome,
-            email: email,
-            message:
-              "Dúvida:\n\n" +
-              duvida +
-              "\n\n---\nEnviado pelo formulário Gestão Ágil 2.0 (iframe)",
-            _subject: "[Gestão Ágil 2.0] Novo chamado — " + nome,
-            _captcha: false,
-          };
+          var body = { nome: nome, email: email, duvida: duvida };
 
-          fetch("https://formsubmit.co/ajax/" + encodeURIComponent(TO), {
+          fetch("/api/submit", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
