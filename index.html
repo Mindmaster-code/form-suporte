@@ -178,21 +178,11 @@
         <p class="hint">Gestão Ágil 2.0 — Mindmaster</p>
       </div>
 
-      <!-- POST clássico ao FormSubmit: não usa /api na Vercel (evita 401 em ambientes protegidos) -->
-      <form
-        id="f"
-        action="https://formsubmit.co/suporte@mindmaster.com.br"
-        method="POST"
-        novalidate
-      >
-        <input type="hidden" name="_captcha" value="false" />
-        <input type="hidden" name="_subject" id="fld_subject" value="" />
-        <input type="hidden" name="_next" id="fld_next" value="" />
-        <input type="hidden" name="message" id="fld_message" value="" />
-
+      <!-- Envio via /api/submit: o navegador não abre formsubmit.co (evita bloqueio Umbrella/OpenDNS no cliente). -->
+      <form id="f" novalidate>
         <div class="field">
           <label for="nome">Nome</label>
-          <input id="nome" name="name" type="text" required autocomplete="name" />
+          <input id="nome" name="nome" type="text" required autocomplete="name" />
         </div>
         <div class="field">
           <label for="email">E-mail</label>
@@ -200,7 +190,7 @@
         </div>
         <div class="field">
           <label for="duvida">Dúvida</label>
-          <textarea id="duvida" required></textarea>
+          <textarea id="duvida" name="duvida" required></textarea>
         </div>
 
         <button type="submit" id="btn" data-label="Enviar">Enviar</button>
@@ -218,9 +208,7 @@
         var btn = document.getElementById("btn");
         var ok = document.getElementById("ok");
         var err = document.getElementById("err");
-        var fldNext = document.getElementById("fld_next");
-        var fldSubject = document.getElementById("fld_subject");
-        var fldMessage = document.getElementById("fld_message");
+        var btnLabel = btn.getAttribute("data-label") || "Enviar";
 
         function showError(text) {
           ok.classList.remove("is-visible");
@@ -228,31 +216,16 @@
           err.classList.add("is-visible");
         }
 
-        function setNextUrl() {
-          var u = new URL(window.location.href);
-          u.search = "";
-          u.hash = "";
-          var base = u.origin + (u.pathname || "/");
-          if (base.slice(-1) !== "/") {
-            base += "/";
-          }
-          fldNext.value = base + "?enviado=1";
-        }
-
-        setNextUrl();
-
-        if (new URLSearchParams(window.location.search).get("enviado") === "1") {
-          ok.classList.add("is-visible");
-          form.reset();
-          fldMessage.value = "";
-          window.history.replaceState(
-            {},
-            "",
-            window.location.pathname || "/"
-          );
+        function apiUrl() {
+          var o =
+            typeof location !== "undefined" && location.origin
+              ? location.origin
+              : "";
+          return o + "/api/submit";
         }
 
         form.addEventListener("submit", function (e) {
+          e.preventDefault();
           err.textContent = "";
           err.classList.remove("is-visible");
           ok.classList.remove("is-visible");
@@ -262,21 +235,70 @@
           var duvida = document.getElementById("duvida").value.trim();
 
           if (!nome || !email || !duvida) {
-            e.preventDefault();
             showError("Preencha nome, e-mail e dúvida.");
             return;
           }
 
-          fldSubject.value = "[Gestão Ágil 2.0] Novo chamado — " + nome;
-          fldMessage.value =
-            "Dúvida:\n\n" +
-            duvida +
-            "\n\n---\nEnviado pelo formulário Gestão Ágil 2.0 (iframe)";
-          setNextUrl();
-
           btn.disabled = true;
           btn.setAttribute("aria-busy", "true");
           btn.textContent = "Enviando…";
+
+          fetch(apiUrl(), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              nome: nome,
+              email: email,
+              duvida: duvida,
+            }),
+          })
+            .then(function (r) {
+              return r.text().then(function (text) {
+                var data = {};
+                try {
+                  data = text ? JSON.parse(text) : {};
+                } catch (ignore) {}
+                if (!r.ok) {
+                  if (r.status === 401 || r.status === 403) {
+                    throw new Error(
+                      "Acesso negado à API do site (configuração Vercel). Em Team Settings → Deployment Protection, permita funções em produção ou use um domínio sem proteção nesta rota."
+                    );
+                  }
+                  var msg =
+                    (data && data.message) ||
+                    (text && text.length < 280 ? text : "") ||
+                    "Falha ao enviar (código " + r.status + ").";
+                  if (
+                    text &&
+                    (text.indexOf("<!doctype") === 0 ||
+                      text.indexOf("<html") !== -1)
+                  ) {
+                    msg =
+                      "Resposta inválida do servidor. Confira se o deploy inclui a pasta /api e a URL é a de produção.";
+                  }
+                  throw new Error(msg);
+                }
+                return data;
+              });
+            })
+            .then(function () {
+              form.reset();
+              ok.classList.add("is-visible");
+            })
+            .catch(function (er) {
+              showError(
+                (er && er.message) ||
+                  "Não foi possível enviar. Tente de novo em instantes."
+              );
+            })
+            .finally(function () {
+              btn.disabled = false;
+              btn.removeAttribute("aria-busy");
+              btn.textContent = btnLabel;
+            });
         });
       })();
     </script>
